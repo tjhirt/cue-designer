@@ -1,7 +1,5 @@
+import React from 'react'
 import { useCueDesigns, useCreateCue, useDeleteCue } from '@/hooks/useCueDesigns'
-import { DesignStyle } from '@/types/cue'
-
-const DESIGN_STYLES: DesignStyle[] = ['traditional_classic', 'modern_minimal', 'ornate', 'art_deco', 'contemporary']
 
 export default function CueList() {
   const { data: cues, isLoading } = useCueDesigns()

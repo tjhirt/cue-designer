@@ -10,5 +10,5 @@ export const cuesApi = {
   delete: (id: number) => api.delete(`/cues/${id}/`),
   getGeometry: (id: number) => api.get(`/cues/${id}/geometry/`).then(res => res.data),
   getProfileData: (id: number) => api.get(`/cues/${id}/profile-data/`).then(res => res.data),
-  getSvg: (cueId: string) => axios.get(`/api/svg/${cueId}/`, { responseType: 'text' }),
+  getSvg: (cueId: string) => api.get(`/api/svg/${cueId}/`, { responseType: 'text' }),
 }

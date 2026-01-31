@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef } from 'react'
 import { CueDesign } from '@/types/cue'
 
 interface GeometryCanvasProps {

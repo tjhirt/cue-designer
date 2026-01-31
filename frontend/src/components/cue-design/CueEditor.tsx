@@ -1,12 +1,24 @@
-import { useCueStore, useCueDesigns, useUpdateCue } from '@/hooks/useCueDesigns'
+import React from 'react'
+import { useCueStore } from '@/stores/cueStore'
+import { useUpdateCue } from '@/hooks/useCueDesigns'
 import { exportSvg, exportJson } from '@/utils/export'
-import { Home, Save, Download } from 'lucide-react'
+import { Save, Download } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
+import { CueDesign } from '@/types/cue'
 
-export default function CueEditor() {
-  const { currentCue, selectedSectionId, updateSection } = useCueStore()
+interface CueEditorProps {
+  cue: CueDesign
+}
+
+export default function CueEditor({ cue: initialCue }: CueEditorProps) {
+  const { currentCue, selectedSectionId, updateSection, setCurrentCue } = useCueStore()
   const navigate = useNavigate()
   const updateCueMutation = useUpdateCue()
+
+  // Initialize the store with the provided cue
+  React.useEffect(() => {
+    setCurrentCue(initialCue)
+  }, [initialCue, setCurrentCue])
 
   const handleSave = () => {
     if (currentCue?.id) {
@@ -152,7 +164,7 @@ export default function CueEditor() {
                     <label className="block text-sm font-medium mb-1">Section Type</label>
                     <select
                       value={selectedSection.section_type}
-                      onChange={(e) => updateSection(selectedSection.section_id, { section_type: e.target.value as any })}
+                      onChange={(e) => updateSection(selectedSection.section_id, { section_type: e.target.value as 'joint' | 'forearm' | 'handle' | 'sleeve' | 'butt' })}
                       className="w-full p-2 border rounded"
                     >
                       {SECTION_TYPES.map(type => (
