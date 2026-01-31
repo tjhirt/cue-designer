@@ -7,6 +7,18 @@ from cues.geometry.core import CueSectionGeometry, CueDesignGeometry
 class CueSectionSerializer(serializers.ModelSerializer):
     length_in = serializers.ReadOnlyField()
     taper_rate_mm_per_in = serializers.ReadOnlyField()
+    weight_oz = serializers.ReadOnlyField()
+    balance_point_in = serializers.ReadOnlyField()
+    qc_status = serializers.ReadOnlyField()
+    joint_type = serializers.CharField(required=False, allow_null=True)
+    joint_collar_diameter_mm = serializers.FloatField(required=False, allow_null=True)
+    joint_pin_material = serializers.CharField(required=False, allow_null=True)
+    wood_species = serializers.CharField(required=False, allow_null=True)
+    wrap_type = serializers.CharField(required=False, allow_null=True)
+    wrap_color = serializers.CharField(required=False, allow_null=True)
+    wrap_pattern = serializers.CharField(required=False, allow_null=True)
+    finish_type = serializers.CharField(required=False, allow_null=True)
+    stain_color = serializers.CharField(required=False, allow_null=True)
 
     class Meta:
         model = CueSection
@@ -24,6 +36,10 @@ class CueSectionSerializer(serializers.ModelSerializer):
 
 class CueDesignSerializer(serializers.ModelSerializer):
     sections = CueSectionSerializer(many=True, read_only=True)
+    shaft_diameter_mm = serializers.FloatField(required=False, allow_null=True)
+    shaft_length_in = serializers.FloatField(required=False, allow_null=True)
+    tip_type = serializers.CharField(required=False, allow_null=True)
+    tip_size_mm = serializers.FloatField(required=False, allow_null=True)
 
     class Meta:
         model = CueDesign
@@ -53,7 +69,7 @@ class CueDesignCreateSerializer(CueDesignSerializer):
 
         # Validate geometry
         geometry = self._create_geometry_from_db(cue_design)
-        self._validate_geometry(geometry)
+        self._validate_geometry(geometry, cue_design)
 
         return cue_design
 
@@ -71,8 +87,26 @@ class CueDesignCreateSerializer(CueDesignSerializer):
 
         return CueDesignGeometry(sections)
 
-    def _validate_geometry(self, geometry):
+    def _validate_geometry(self, geometry, cue_design):
         """Validate complete geometry"""
+        from cues.geometry.validators import CueGeometryValidator
+
+        # Validate section sequence
+        all_sections = list(cue_design.sections.values())
+        sequence_issues = CueGeometryValidator.validate_section_sequence(all_sections)
+        if sequence_issues:
+            raise serializers.ValidationError({"sequence_validation": sequence_issues})
+
+        # Validate section constraints
+        for section_data in all_sections:
+            constraint_issues = CueGeometryValidator.validate_section_constraints(
+                section_data
+            )
+            if constraint_issues:
+                raise serializers.ValidationError(
+                    {"section_constraints": constraint_issues}
+                )
+
         continuity_issues = geometry.validate_continuity()
         manufacturing_issues = geometry.validate_manufacturing_constraints()
 

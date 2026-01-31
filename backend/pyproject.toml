@@ -3,9 +3,9 @@ name = "cue-designer"
 version = "0.1.0"
 description = "Django REST application for designing pool cue butt sections"
 readme = "README.md"
-requires-python = ">=3.14"
+requires-python = ">=3.11"
 dependencies = [
-    "django>=6.0.1",
+    "django>=5.1.0",
     "djangorestframework>=3.15.0",
     "django-cors-headers>=4.3.0",
     "shapely>=2.0.0",
@@ -26,15 +26,15 @@ dev = [
 [tool.pytest.ini_options]
 DJANGO_SETTINGS_MODULE = "cue_designer.settings"
 python_files = ["test_*.py", "*_test.py"]
-addopts = "--reuse-db --nomigrations --cov=apps --cov-report=html"
+addopts = "--reuse-db --nomigrations --cov=cues --cov-report=html"
 
 [tool.black]
 line-length = 88
-target-version = ['py314']
+target-version = ['py311']
 
 [tool.ruff]
 line-length = 88
-target-version = "py314"
+target-version = "py311"
 select = [
     "E",  # pycodestyle errors
     "W",  # pycodestyle warnings
@@ -50,7 +50,7 @@ ignore = [
 ]
 
 [tool.mypy]
-python_version = "3.14"
+python_version = "3.11"
 check_untyped_defs = true
 disallow_any_generics = true
 disallow_incomplete_defs = true

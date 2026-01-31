@@ -1,277 +1,263 @@
-# Cue Designer - Django REST API
+# Cue Designer - Django REST + React Full-Stack
 
-A Django REST application for designing the butt sections of pool cues (forearm, handle, butt sleeve only). The application is deterministic, user-driven, schema-first, geometry-based, and oriented toward SVG/CAD output.
+A full-stack web application for designing pool cue butt sections (joint, forearm, handle, sleeve, butt). Features real-time validation, interactive UI, and SVG/CAD export capabilities.
 
-## Features
+## Architecture
 
-- **Schema-First Design**: Strict adherence to the provided cue design schema
-- **Geometry-Based**: Custom geometry classes for precise calculations
-- **Manufacturing Validation**: Real-world manufacturing constraint checking
-- **SVG Generation**: Visual profile views of cue designs
-- **Django REST API**: Full CRUD operations for cue designs
-- **Admin Interface**: Django admin for data management
-
-## Quick Start with UV
-
-### Prerequisites
-- Python 3.14+
-- [UV](https://docs.astral.sh/uv/getting-started/installation/) dependency manager
-
-### Installation
-
-1. Clone the repository
-2. Install dependencies with UV:
-   ```bash
-   uv sync --dev
-   ```
-
-3. Run migrations:
-   ```bash
-   uv run python manage.py migrate
-   ```
-
-4. Create superuser (optional):
-   ```bash
-   uv run python manage.py createsuperuser
-   ```
-
-5. Start development server:
-   ```bash
-   uv run python manage.py runserver
-   ```
-
-### Quick Start Scripts
-
-#### Windows PowerShell
-```powershell
-.\start.ps1
+```
+cue-designer/
+├── backend/                    # Django REST API
+│   ├── cue_designer/          # Django settings
+│   ├── cues/
+│   │   ├── models.py          # Django ORM with 5 section types
+│   │   ├── api/               # REST API (serializers, views)
+│   │   ├── geometry/          # Pure Python geometry logic
+│   │   ├── rendering/         # SVG generation
+│   │   └── migrations/
+│   ├── manage.py
+│   ├── pyproject.toml
+│   └── db.sqlite3
+│
+└── frontend/                   # React + TypeScript + Vite
+    ├── src/
+    │   ├── components/        # React components
+    │   ├── pages/           # Route pages
+    │   ├── hooks/           # Custom React hooks
+    │   ├── services/         # API client
+    │   ├── stores/          # Zustand state
+    │   ├── types/           # TypeScript types
+    │   └── utils/          # Utilities
+    ├── package.json
+    ├── vite.config.ts
+    ├── tsconfig.json
+    └── .env
 ```
 
-#### Windows/Unix Bash
-```bash
-./start.sh
-```
+## Prerequisites
 
-#### Manual Steps
+- Python 3.11+
+- UV dependency manager
+- Node.js 18+
+- npm
+
+## Quick Start
+
+### Backend (Django)
 ```bash
+cd backend
+
+# Install dependencies
 uv sync --dev
+
+# Run migrations
 uv run python manage.py migrate
+
+# Start server
 uv run python manage.py runserver
 ```
 
+### Frontend (React)
+```bash
+cd frontend
+
+# Install dependencies
+npm install
+
+# Start dev server
+npm run dev
+```
+
+## Development Commands
+
+### Backend
+```bash
+# Create migrations
+uv run python manage.py makemigrations cues
+
+# Apply migrations
+uv run python manage.py migrate
+
+# Run tests
+uv run pytest tests/ -v --cov=cues --cov-report=html
+
+# Code quality
+uv run black .
+uv run ruff check .
+uv run mypy cues/
+```
+
+### Frontend
+```bash
+# Install new dependencies
+npm install <package-name>
+
+# Run tests
+npm run test
+
+# Build for production
+npm run build
+
+# Run E2E tests
+npm run test:e2e
+
+# Lint code
+npm run lint
+```
+
+## Running Both Servers
+
+For full-stack development, run both servers in separate terminals:
+
+**Terminal 1 (Backend):**
+```bash
+cd backend && uv run python manage.py runserver
+```
+
+**Terminal 2 (Frontend):**
+```bash
+cd frontend && npm run dev
+```
+
+## Project Structure Details
+
+### Backend
+
+**Models (`backend/cues/models.py`)**
+- `CueDesign`: Main design model with shaft specifications
+- `CueSection`: 5 section types (joint, forearm, handle, sleeve, butt)
+- Added fields: joint config, materials, physical properties, QC status
+
+**API (`backend/cues/api/`)**
+- `CueDesignSerializer`: Full serializer with shaft fields
+- `CueDesignCreateSerializer`: Nested section creation with validation
+- `CueSectionSerializer`: Material, joint, and physical properties
+
+**Validation (`backend/cues/geometry/validators.py`)**
+- Section sequence validation (joint → forearm → handle → sleeve → butt)
+- Section-specific constraints (min/max length and diameter per type)
+- Manufacturing constraints (taper angle, radius limits)
+- Inlay pattern validation
+
+**Geometry (`backend/cues/geometry/core.py`)**
+- `Point3D`: 3D points with axial/radial/rotational coordinates
+- `CueSectionGeometry`: Individual section geometry
+- `CueDesignGeometry`: Complete cue geometry
+
+### Frontend
+
+**Components (`frontend/src/components/`)**
+- `cue-design/CueEditor.tsx`: Main editor interface
+- `cue-design/GeometryCanvas.tsx`: SVG visualization
+- `pages/CueList.tsx`: List of cue designs
+
+**State Management (`frontend/src/stores/`)**
+- `cueStore.ts`: Zustand store for cue design state
+
+**API Client (`frontend/src/services/`)**
+- `api.ts`: Axios client with interceptors
+- `cues.ts`: Cue design API calls
+
+**Hooks (`frontend/src/hooks/`)**
+- `useCueDesigns.ts`: React Query hooks for CRUD operations
+
+**Types (`frontend/src/types/`)**
+- `cue.ts`: TypeScript interfaces for CueDesign, CueSection, etc.
+
 ## API Endpoints
 
-### Cue Designs
+### Backend
 - `GET /api/v1/cues/` - List all cue designs
 - `POST /api/v1/cues/` - Create new cue design
 - `GET /api/v1/cues/{id}/` - Get specific cue design
 - `PUT /api/v1/cues/{id}/` - Update cue design
 - `DELETE /api/v1/cues/{id}/` - Delete cue design
-
-### Geometry Operations
-- `GET /api/v1/cues/{id}/geometry/` - Get geometry validation info
-- `GET /api/v1/cues/{id}/profile-data/` - Get profile data for rendering
+- `GET /api/v1/cues/{id}/geometry/` - Get validation information
+- `GET /api/v1/cues/{id}/profile-data/` - Get profile points
 - `GET /api/svg/{cue_id}/` - Get SVG profile view
 
-### Cue Sections
-- `GET /api/v1/sections/` - List all sections
-- `POST /api/v1/sections/` - Create new section
-- `GET /api/v1/sections/{id}/` - Get specific section
-- `PUT /api/v1/sections/{id}/` - Update section
-- `DELETE /api/v1/sections/{id}/` - Delete section
+### Frontend Routes
+- `/` - Cue design list
+- `/cues/:id/edit` - Cue editor
 
 ## Data Model
 
-### Cue Design Schema
+### CueDesign
+- `cue_id`: Unique identifier
+- `design_style`: traditional_classic, modern_minimal, ornate, art_deco, contemporary
+- `overall_length_in`: Total length in inches (max 40")
+- `symmetry_type`: radial, bilateral, asymmetric
+- `era_influence`: vintage, traditional, modern, contemporary
+- `complexity_level`: low, medium, high
+- `sections`: Array of CueSection objects
+- `shaft_diameter_mm`: Shaft diameter at joint
+- `shaft_length_in`: Total shaft length
+- `tip_type`: leather, phenolic, layered
+- `tip_size_mm`: Tip diameter
 
-```json
-{
-  "cue_id": "CUE_0023",
-  "design_style": "modern_minimal",
-  "overall_length_in": 29.0,
-  "symmetry_type": "radial",
-  "era_influence": "modern",
-  "complexity_level": "low",
-  "sections": [
-    {
-      "section_id": "SEC_FOREARM",
-      "section_type": "forearm",
-      "start_position_in": 0.0,
-      "end_position_in": 11.0,
-      "outer_diameter_start_mm": 21.3,
-      "outer_diameter_end_mm": 20.2,
-      "inlay_patterns": []
-    }
-  ]
-}
-```
+### CueSection
+- `section_type`: joint, forearm, handle, sleeve, butt
+- `start_position_in`: Start position in inches
+- `end_position_in`: End position in inches
+- `outer_diameter_start_mm`: Start diameter in mm
+- `outer_diameter_end_mm`: End diameter in mm
+- `joint_type`: 5/16-18, 3/8-10, radial, uni-loc, quick_release (joint only)
+- `wood_species`: maple, ebony, rosewood, cocobolo, bubinga, purpleheart
+- `wrap_type`: irish_linen, leather, synthetic, none (handle only)
+- `wrap_color`: Color of wrap
+- `finish_type`: oil, polyurethane, lacquer, wax
+- `inlay_patterns`: Array of inlay pattern definitions
+- `weight_oz`: Section weight in ounces
+- `balance_point_in`: Distance from joint end to balance point
+- `production_notes`: Manufacturing notes
+- `qc_status`: pending, approved, rejected, in_production, completed
 
-### Section Types
-- `forearm` - The front section of the cue butt
-- `handle` - The middle gripping section
-- `butt_sleeve` - The rear section with weight
+## Section Types & Constraints
 
-### Design Styles
-- `traditional_classic` - Classic traditional designs
-- `modern_minimal` - Clean, minimalist modern designs
-- `ornate` - Highly decorative, complex designs
-- `art_deco` - Art Deco inspired designs
-- `contemporary` - Modern contemporary styles
+| Section Type | Min Length | Max Length | Min Diameter | Max Diameter |
+|---------------|-------------|-------------|---------------|---------------|
+| joint         | 0.5"        | 2.0"        | 18mm         | 25mm         |
+| forearm        | 8.0"        | 14.0"       | 19mm         | 24mm         |
+| handle         | 8.0"        | 12.0"       | 20mm         | 26mm         |
+| sleeve         | 4.0"        | 8.0"        | 24mm         | 32mm         |
+| butt           | 2.0"        | 6.0"        | 26mm         | 32mm         |
 
-## Geometry Validation
+## Manufacturing Constraints
 
-The application includes comprehensive validation for:
+- Taper angle: Maximum 5°
+- Radius limits: 5mm minimum, 25mm maximum
+- Section length: 2" minimum, 20" maximum
+- Total length: 40" maximum
+- Diameter jumps: Maximum 1mm between sections
+- Sequence: joint → forearm → handle → sleeve → butt (must be ordered correctly)
 
-### Manufacturing Constraints
-- **Taper angles**: Maximum 5° taper angle
-- **Radius limits**: 5mm minimum, 25mm maximum radius
-- **Section lengths**: 2" minimum, 20" maximum per section
-- **Total length**: Maximum 40" for butt section
-- **Diameter jumps**: Maximum 1mm change between sections
+## Development Workflow
 
-### Section Continuity
-- **Gap detection**: Identifies gaps between sections
-- **Overlap prevention**: Prevents section overlaps
-- **Smooth transitions**: Validates smooth diameter transitions
+1. Make backend changes
+2. Run migrations
+3. Update frontend types/stores
+4. Test API endpoints
+5. Update UI components
+6. Test full-stack functionality
 
-## Example Usage
+## Status
 
-### Create a Cue Design
+**Completed:**
+- ✅ Phase 1: Fixed Python version (3.11), Django version (5.1), test config
+- ✅ Phase 2: Added 5 section types, joint fields, material fields, physical properties
+- ✅ Phase 3: Updated serializers, added validation (sequence, constraints, manufacturing)
+- ✅ Phase 4: Frontend setup (React + Vite + TypeScript)
+- ✅ Phase 5: Frontend components (CueEditor, GeometryCanvas, CueList)
 
-```bash
-curl -X POST http://localhost:8000/api/v1/cues/ \
-  -H "Content-Type: application/json" \
-  -d '{
-    "cue_id": "EXAMPLE_001",
-    "design_style": "modern_minimal",
-    "overall_length_in": 29.0,
-    "symmetry_type": "radial",
-    "era_influence": "modern",
-    "complexity_level": "low",
-    "sections": [
-      {
-        "section_id": "SEC_FOREARM",
-        "section_type": "forearm",
-        "start_position_in": 0.0,
-        "end_position_in": 11.0,
-        "outer_diameter_start_mm": 21.3,
-        "outer_diameter_end_mm": 20.2
-      },
-      {
-        "section_id": "SEC_SLEEVE",
-        "section_type": "butt_sleeve",
-        "start_position_in": 21.5,
-        "end_position_in": 27.0,
-        "outer_diameter_start_mm": 30.0,
-        "outer_diameter_end_mm": 30.0
-      }
-    ]
-  }'
-```
+**In Progress:**
+- 🔄 Phase 6: Full integration testing
 
-### Get SVG Profile
-
-```bash
-curl http://localhost:8000/api/svg/EXAMPLE_001/
-```
-
-### Validate Geometry
-
-```bash
-curl http://localhost:8000/api/v1/cues/1/geometry/
-```
-
-## Architecture
-
-### Project Structure
-```
-cue_designer/
-├── manage.py
-├── cue_designer/           # Django project settings
-├── cues/                   # Main Django app
-│   ├── models.py          # Cue design models
-│   ├── api/               # REST API components
-│   │   ├── serializers.py
-│   │   ├── views.py
-│   │   └── urls.py
-│   ├── geometry/          # Geometry logic (separate from web)
-│   │   ├── core.py        # Core geometry classes
-│   │   ├── validators.py  # Manufacturing constraints
-│   │   └── operations.py  # Advanced geometry operations
-│   ├── rendering/         # SVG generation
-│   │   ├── svg_generator.py
-│   │   └── coordinate_transform.py
-│   └── services.py        # Business logic layer
-└── tests/                 # Test suite
-```
-
-### Key Components
-
-#### Geometry Core (`cues/geometry/core.py`)
-- `Point3D` - 3D points in axial/radial/rotational coordinates
-- `CueSectionGeometry` - Individual section geometry
-- `CueDesignGeometry` - Complete cue design geometry
-
-#### Validators (`cues/geometry/validators.py`)
-- `CueGeometryValidator` - Manufacturing constraint validation
-- `InlayPatternValidator` - Pattern structure validation
-
-#### Rendering (`cues/rendering/`)
-- `SVGGenerator` - Profile view SVG generation
-- `CoordinateTransform` - Geometry to SVG coordinate conversion
-
-## Development
-
-### Running Tests
-```bash
-python manage.py test
-```
-
-### Creating Migrations
-```bash
-python manage.py makemigrations
-```
-
-### Django Admin
-Access the admin interface at `http://localhost:8000/admin/` for data management.
-
-## Manufacturing Integration
-
-The geometry validation system ensures designs are physically manufacturable:
-
-### Real-World Constraints
-- Maximum taper angles for wood stability
-- Minimum radius for structural integrity
-- Maximum diameter for playability
-- Smooth transitions for comfort
-
-### Tolerance Checking
-- Diameter tolerances: ±0.05mm
-- Length tolerances: ±0.1mm
-- Taper tolerances: ±0.5°
-- Concentricity tolerances: ±0.02mm
-
-## Future Enhancements
-
-### Phase 2: Inlay Patterns
-- Pattern placement and validation
-- Material assignment tracking
-- Enhanced SVG rendering with inlays
-
-### Phase 3: Export Formats
-- DXF export for CAD software
-- STEP format for 3D manufacturing
-- Material cut lists
-
-### Phase 4: Advanced Features
-- Weight and balance calculations
-- Cost estimation
-- Production planning integration
-
-## License
-
-[Add your license information here]
+**Pending:**
+- ⏳ Phase 7: Testing & polish, documentation updates
 
 ## Contributing
 
 [Add contribution guidelines here]
+
+## License
+
+[Add license information here]

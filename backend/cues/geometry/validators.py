@@ -129,6 +129,100 @@ class CueGeometryValidator:
 
         return issues
 
+    SECTION_CONSTRAINTS = {
+        "joint": {
+            "min_length_in": 0.5,
+            "max_length_in": 2.0,
+            "min_diameter_mm": 18.0,
+            "max_diameter_mm": 25.0,
+        },
+        "forearm": {
+            "min_length_in": 8.0,
+            "max_length_in": 14.0,
+            "min_diameter_mm": 19.0,
+            "max_diameter_mm": 24.0,
+        },
+        "handle": {
+            "min_length_in": 8.0,
+            "max_length_in": 12.0,
+            "min_diameter_mm": 20.0,
+            "max_diameter_mm": 26.0,
+        },
+        "sleeve": {
+            "min_length_in": 4.0,
+            "max_length_in": 8.0,
+            "min_diameter_mm": 24.0,
+            "max_diameter_mm": 32.0,
+        },
+        "butt": {
+            "min_length_in": 2.0,
+            "max_length_in": 6.0,
+            "min_diameter_mm": 26.0,
+            "max_diameter_mm": 32.0,
+        },
+    }
+
+    @staticmethod
+    def validate_section_sequence(sections_data: List[Dict[str, Any]]) -> List[str]:
+        """Validate proper section ordering: joint → forearm → handle → sleeve → butt"""
+        VALID_SEQUENCE = ["joint", "forearm", "handle", "sleeve", "butt"]
+        issues = []
+
+        if not sections_data:
+            return issues
+
+        sorted_sections = sorted(sections_data, key=lambda s: s["start_position_in"])
+        section_types = [s["section_type"] for s in sorted_sections]
+
+        for i, expected_type in enumerate(VALID_SEQUENCE):
+            if i >= len(section_types):
+                break
+            actual_type = section_types[i]
+            if actual_type != expected_type:
+                issues.append(
+                    f"Section {i + 1} should be '{expected_type}' but found '{actual_type}'"
+                )
+
+        return issues
+
+    @staticmethod
+    def validate_section_constraints(section_data: Dict[str, Any]) -> List[str]:
+        """Validate section-specific length and diameter constraints"""
+        issues = []
+        section_type = section_data.get("section_type")
+
+        if section_type not in SECTION_CONSTRAINTS:
+            return issues
+
+        constraints = SECTION_CONSTRAINTS[section_type]
+
+        length = section_data.get("end_position_in", 0) - section_data.get(
+            "start_position_in", 0
+        )
+        if length < constraints["min_length_in"]:
+            issues.append(
+                f'{section_type} too short: {length:.2f}" (min {constraints["min_length_in"]}")'
+            )
+        if length > constraints["max_length_in"]:
+            issues.append(
+                f'{section_type} too long: {length:.2f}" (max {constraints["max_length_in"]}")'
+            )
+
+        start_diameter = section_data.get("outer_diameter_start_mm", 0)
+        end_diameter = section_data.get("outer_diameter_end_mm", 0)
+
+        for diameter, label in [(start_diameter, "Start"), (end_diameter, "End")]:
+            if diameter < constraints["min_diameter_mm"]:
+                issues.append(
+                    f"{section_type} {label} diameter too small: {diameter:.2f}mm (min {constraints['min_diameter_mm']}mm)"
+                )
+            if diameter > constraints["max_diameter_mm"]:
+                issues.append(
+                    f"{section_type} {label} diameter too large: {diameter:.2f}mm (max {constraints['max_diameter_mm']}mm)"
+                )
+
+        return issues
+
 
 class InlayPatternValidator:
     """Validate inlay pattern structures"""
@@ -150,6 +244,19 @@ class InlayPatternValidator:
         "surface_inlay",
         "pocket_inlay",
         "inlay_ring",
+    ]
+    VALID_MATERIALS = [
+        "ebony",
+        "maple",
+        "rosewood",
+        "cocobolo",
+        "ivory",
+        "abalone",
+        "mother_of_pearl",
+        "turquoise",
+        "silver",
+        "gold",
+        "brass",
     ]
 
     @classmethod
@@ -225,6 +332,14 @@ class InlayPatternValidator:
         for field in required_material_fields:
             if field not in material_assign:
                 issues.append(f"Missing required material field: {field}")
+
+        base_material = material_assign.get("base_material")
+        if base_material and base_material not in cls.VALID_MATERIALS:
+            issues.append(f"Invalid base material: {base_material}")
+
+        inlay_material = material_assign.get("inlay_material")
+        if inlay_material and inlay_material not in cls.VALID_MATERIALS:
+            issues.append(f"Invalid inlay material: {inlay_material}")
 
         contrast_level = material_assign.get("contrast_level")
         valid_contrast = ["low", "medium", "high"]

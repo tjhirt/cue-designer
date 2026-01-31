@@ -31,6 +31,12 @@ class CueDesign(models.Model):
         ("high", "High"),
     ]
 
+    TIP_TYPE_CHOICES = [
+        ("leather", "Leather"),
+        ("phenolic", "Phenolic"),
+        ("layered", "Layered"),
+    ]
+
     cue_id = models.CharField(max_length=20, unique=True)
     design_style = models.CharField(max_length=30, choices=DESIGN_STYLE_CHOICES)
     overall_length_in = models.FloatField()
@@ -40,6 +46,18 @@ class CueDesign(models.Model):
     notes = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    shaft_diameter_mm = models.FloatField(
+        blank=True, null=True, help_text="Shaft diameter at joint"
+    )
+    shaft_length_in = models.FloatField(
+        blank=True, null=True, help_text="Total shaft length"
+    )
+    tip_type = models.CharField(
+        max_length=30, blank=True, null=True, choices=TIP_TYPE_CHOICES
+    )
+    tip_size_mm = models.FloatField(
+        blank=True, null=True, help_text="Tip diameter in mm"
+    )
 
     class Meta:
         ordering = ["cue_id"]
@@ -56,9 +74,57 @@ class CueDesign(models.Model):
 
 class CueSection(models.Model):
     SECTION_TYPES = [
+        ("joint", "Joint"),
         ("forearm", "Forearm"),
         ("handle", "Handle"),
-        ("butt_sleeve", "Butt Sleeve"),
+        ("sleeve", "Sleeve"),
+        ("butt", "Butt"),
+    ]
+
+    JOINT_TYPE_CHOICES = [
+        ("5_16_18", "5/16-18"),
+        ("3_8_10", "3/8-10"),
+        ("5_16_14", "5/16-14"),
+        ("radial", "Radial Pin"),
+        ("uni_loc", "Uni-Loc"),
+        ("quick_release", "Quick Release"),
+    ]
+
+    PIN_MATERIAL_CHOICES = [
+        ("stainless_steel", "Stainless Steel"),
+        ("brass", "Brass"),
+        ("titanium", "Titanium"),
+    ]
+
+    WOOD_SPECIES_CHOICES = [
+        ("maple", "Maple"),
+        ("ebony", "Ebony"),
+        ("rosewood", "Rosewood"),
+        ("cocobolo", "Cocobolo"),
+        ("bubinga", "Bubinga"),
+        ("purpleheart", "Purpleheart"),
+    ]
+
+    WRAP_TYPE_CHOICES = [
+        ("irish_linen", "Irish Linen"),
+        ("leather", "Leather"),
+        ("synthetic", "Synthetic"),
+        ("none", "None"),
+    ]
+
+    FINISH_TYPE_CHOICES = [
+        ("oil", "Oil Finish"),
+        ("polyurethane", "Polyurethane"),
+        ("lacquer", "Lacquer"),
+        ("wax", "Wax"),
+    ]
+
+    QC_STATUS_CHOICES = [
+        ("pending", "Pending Review"),
+        ("approved", "Approved"),
+        ("rejected", "Rejected"),
+        ("in_production", "In Production"),
+        ("completed", "Completed"),
     ]
 
     PATTERN_CATEGORIES = [
@@ -79,6 +145,34 @@ class CueSection(models.Model):
     outer_diameter_start_mm = models.FloatField()
     outer_diameter_end_mm = models.FloatField()
     inlay_patterns = models.JSONField(default=list, blank=True)
+
+    joint_type = models.CharField(
+        max_length=30, blank=True, null=True, choices=JOINT_TYPE_CHOICES
+    )
+    joint_collar_diameter_mm = models.FloatField(blank=True, null=True)
+    joint_pin_material = models.CharField(
+        max_length=30, blank=True, null=True, choices=PIN_MATERIAL_CHOICES
+    )
+    wood_species = models.CharField(
+        max_length=50, blank=True, null=True, choices=WOOD_SPECIES_CHOICES
+    )
+    wrap_type = models.CharField(
+        max_length=30, blank=True, null=True, choices=WRAP_TYPE_CHOICES
+    )
+    wrap_color = models.CharField(max_length=30, blank=True, null=True)
+    wrap_pattern = models.CharField(max_length=30, blank=True, null=True)
+    finish_type = models.CharField(
+        max_length=30, blank=True, null=True, choices=FINISH_TYPE_CHOICES
+    )
+    stain_color = models.CharField(max_length=30, blank=True, null=True)
+    weight_oz = models.FloatField(blank=True, null=True)
+    balance_point_in = models.FloatField(
+        blank=True, null=True, help_text="Distance from joint end to balance point"
+    )
+    production_notes = models.TextField(blank=True)
+    qc_status = models.CharField(
+        max_length=20, default="pending", choices=QC_STATUS_CHOICES
+    )
 
     class Meta:
         ordering = ["start_position_in"]
