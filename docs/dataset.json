@@ -1,0 +1,79 @@
+    {
+        "reference_images": [
+            "docs/FB_IMG_1769281330625.jpg",
+            "docs/FB_IMG_1769281340463.jpg",
+            "docs/FB_IMG_1769281672436.jpg",
+            "docs/FB_IMG_1769281699567.jpg",
+            "docs/FB_IMG_1769281718528.jpg",
+            "docs/FB_IMG_1769357205811.jpg",
+            "docs/FB_IMG_1769357291974.jpg",
+            "docs/FB_IMG_1769377281771.jpg",
+            "docs/FB_IMG_1769377453157.jpg",
+            "docs/FB_IMG_1769377458026.jpg",
+            "docs/FB_IMG_1769377497272.jpg",
+            "docs/FB_IMG_1769377509426.jpg",
+            "docs/FB_IMG_1769377733548.jpg",
+            "docs/FB_IMG_1769379060373.jpg",
+            "docs/FB_IMG_1769682955833.jpg",
+            "docs/PXL_20251209_200301250.jpg",
+            "docs/PXL_20251209_200317054.jpg"
+        ],
+        "Example Complete Dataset Entry": {
+            "cue_id": "CUE_0023",
+            "design_style": "modern_minimal",
+            "overall_length_in": 29.0,
+            "symmetry_type": "radial",
+            "era_influence": "modern",
+            "complexity_level": "low",
+            "sections": [
+                {
+                    "section_id": "SEC_FOREARM",
+                    "section_type": "forearm",
+                    "start_position_in": 0.0,
+                    "end_position_in": 11.0,
+                    "outer_diameter_start_mm": 21.3,
+                    "outer_diameter_end_mm": 20.2,
+                    "inlay_patterns": []
+                },
+                {
+                    "section_id": "SEC_SLEEVE",
+                    "section_type": "butt_sleeve",
+                    "start_position_in": 21.5,
+                    "end_position_in": 27.0,
+                    "outer_diameter_start_mm": 30.0,
+                    "outer_diameter_end_mm": 30.0,
+                    "inlay_patterns": [
+                        {
+                            "pattern_id": "INLAY_014",
+                            "pattern_category": "boxed",
+                            "pattern_style": "window_box",
+                            "repeat_count": 4,
+                            "radial_symmetry": true,
+                            "geometric_definition": {
+                                "geometry_type": "rectangular_prism",
+                                "dimensions_mm": {
+                                    "width": 10.0,
+                                    "height": 20.0,
+                                    "depth": 1.8
+                                },
+                                "orientation": {
+                                    "rotation_deg": 0,
+                                    "axis": "cue_centerline"
+                                },
+                                "positioning": {
+                                    "x_center_in": 24.0
+                                }
+                            },
+                            "material_assignment": {
+                                "base_material": "ebony",
+                                "inlay_material": "silver",
+                                "contrast_level": "high",
+                                "finish_type": "high_gloss"
+                            }
+                        }
+                    ]
+                }
+            ],
+            "notes": "Minimalist modern cue with visual weight concentrated in sleeve."
+        }
+    }
