@@ -12,7 +12,7 @@ export type FinishType = 'oil' | 'polyurethane' | 'lacquer' | 'wax'
 export type TipType = 'leather' | 'phenolic' | 'layered'
 export type QCStatus = 'pending' | 'approved' | 'rejected' | 'in_production' | 'completed'
 
-export interface InlayPattern {
+export type InlayPattern = {
   pattern_id: string
   pattern_category: string
   pattern_style: string
@@ -41,7 +41,7 @@ export interface InlayPattern {
   }
 }
 
-export interface CueSection {
+export type CueSection = {
   id?: number
   section_id: string
   section_type: SectionType
@@ -67,7 +67,7 @@ export interface CueSection {
   qc_status?: QCStatus
 }
 
-export interface CueDesign {
+export type CueDesign = {
   id?: number
   cue_id: string
   design_style: DesignStyle
@@ -85,7 +85,7 @@ export interface CueDesign {
   tip_size_mm?: number
 }
 
-export interface ValidationError {
+export type ValidationError = {
   field?: string
   message: string
   section_id?: string
