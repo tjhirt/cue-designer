@@ -1,5 +1,6 @@
 import type { Section, SectionKey } from "../../types"
 import { RingStack } from "./RingStack"
+import { InlayRenderer } from "../inlays/InlayRenderer"
 
 type Props = {
   sectionKey: SectionKey
@@ -33,6 +34,15 @@ export function SectionRenderer({ sectionKey, section, x, y, width, onHover }: P
         stroke="#111"
         strokeWidth={0.5}
       />
+      {section.inlay && (
+        <InlayRenderer
+          config={section.inlay}
+          x={x}
+          y={y + topRingsHeight}
+          width={width}
+          height={baseHeight}
+        />
+      )}
       {section.ringsTop.length > 0 && (
         <RingStack
           rings={section.ringsTop}

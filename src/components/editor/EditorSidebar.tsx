@@ -1,7 +1,8 @@
 import { useCueStore } from "../../store/useCueStore"
-import type { SectionKey, RingLayer } from "../../types"
+import type { SectionKey, RingLayer, InlayConfig } from "../../types"
 import { SectionEditor } from "./SectionEditor"
 import { RingEditor } from "./RingEditor"
+import { InlayEditor } from "./InlayEditor"
 
 const SECTIONS: SectionKey[] = [
   "jointCollar",
@@ -19,6 +20,7 @@ export function EditorSidebar() {
   const addRingLayer = useCueStore((state) => state.addRingLayer)
   const removeRingLayer = useCueStore((state) => state.removeRingLayer)
   const updateRingLayer = useCueStore((state) => state.updateRingLayer)
+  const setInlay = useCueStore((state) => state.setInlay)
 
   const generateId = () => `ring-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`
 
@@ -29,6 +31,10 @@ export function EditorSidebar() {
       thickness: 3,
     }
     addRingLayer(sectionKey, position, ring)
+  }
+
+  const handleSetInlay = (sectionKey: SectionKey, inlay: InlayConfig | undefined) => {
+    setInlay(sectionKey, inlay)
   }
 
   return (
@@ -80,6 +86,11 @@ export function EditorSidebar() {
               sectionKey={sectionKey}
               section={section}
               onUpdate={(update) => updateSection(sectionKey, update)}
+            />
+
+            <InlayEditor
+              inlay={section.inlay}
+              onSetInlay={(inlay) => handleSetInlay(sectionKey, inlay)}
             />
 
             <RingEditor
