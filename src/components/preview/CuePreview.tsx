@@ -28,6 +28,18 @@ export function CuePreview() {
   const svgWidth = CUE_WIDTH + SVG_PADDING * 2
 
   let currentY = SVG_PADDING
+  const jointPinY = currentY
+  currentY += JOINT_PIN_HEIGHT
+
+  const sectionPositions: { key: typeof sections[0]["key"]; y: number; height: number }[] = []
+  
+  sections.forEach(({ key, section }) => {
+    const sectionHeight = getSectionHeight(section)
+    sectionPositions.push({ key, y: currentY, height: sectionHeight })
+    currentY += sectionHeight
+  })
+
+  const hoveredPos = sectionPositions.find((p) => p.key === hoveredSection)
 
   return (
     <svg
@@ -39,30 +51,39 @@ export function CuePreview() {
       <JointPin
         jointPin={design.jointPin}
         x={SVG_PADDING}
-        y={currentY}
+        y={jointPinY}
         width={CUE_WIDTH}
         height={JOINT_PIN_HEIGHT}
       />
-      {currentY += JOINT_PIN_HEIGHT}
 
       {sections.map(({ key, section }) => {
-        const sectionHeight = getSectionHeight(section)
-        const startY = currentY
-        currentY += sectionHeight
-
+        const pos = sectionPositions.find((p) => p.key === key)!
         return (
           <SectionRenderer
             key={key}
             sectionKey={key}
             section={section}
             x={SVG_PADDING}
-            y={startY}
+            y={pos.y}
             width={CUE_WIDTH}
-            isHighlighted={hoveredSection === key}
             onHover={setHoveredSection}
           />
         )
       })}
+
+      {hoveredPos && (
+        <rect
+          x={SVG_PADDING - 2}
+          y={hoveredPos.y - 2}
+          width={CUE_WIDTH + 4}
+          height={hoveredPos.height + 4}
+          fill="none"
+          stroke="#4af"
+          strokeWidth={3}
+          opacity={0.8}
+          style={{ pointerEvents: "none" }}
+        />
+      )}
     </svg>
   )
 }
