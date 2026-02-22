@@ -8,6 +8,8 @@ const SVG_PADDING = 20
 
 export function CuePreview() {
   const design = useCueStore((state) => state.design)
+  const hoveredSection = useCueStore((state) => state.hoveredSection)
+  const setHoveredSection = useCueStore((state) => state.setHoveredSection)
 
   const sections = [
     { key: "jointCollar" as const, section: design.jointCollar },
@@ -51,10 +53,13 @@ export function CuePreview() {
         return (
           <SectionRenderer
             key={key}
+            sectionKey={key}
             section={section}
             x={SVG_PADDING}
             y={startY}
             width={CUE_WIDTH}
+            isHighlighted={hoveredSection === key}
+            onHover={setHoveredSection}
           />
         )
       })}

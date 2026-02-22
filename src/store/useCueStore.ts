@@ -22,6 +22,8 @@ const defaultDesign: CueDesign = {
 
 type CueStore = {
   design: CueDesign
+  hoveredSection: SectionKey | null
+  setHoveredSection: (key: SectionKey | null) => void
   setJointPin: (jointPin: JointPin) => void
   updateSection: (key: SectionKey, section: Partial<Section>) => void
   addRingLayer: (sectionKey: SectionKey, position: "top" | "bottom", ring: RingLayer) => void
@@ -36,6 +38,9 @@ type CueStore = {
 
 export const useCueStore = create<CueStore>((set) => ({
   design: defaultDesign,
+  hoveredSection: null,
+
+  setHoveredSection: (key) => set({ hoveredSection: key }),
 
   setJointPin: (jointPin) =>
     set((state) => ({

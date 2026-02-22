@@ -13,6 +13,8 @@ const SECTIONS: SectionKey[] = [
 
 export function EditorSidebar() {
   const design = useCueStore((state) => state.design)
+  const hoveredSection = useCueStore((state) => state.hoveredSection)
+  const setHoveredSection = useCueStore((state) => state.setHoveredSection)
   const updateSection = useCueStore((state) => state.updateSection)
   const addRingLayer = useCueStore((state) => state.addRingLayer)
   const removeRingLayer = useCueStore((state) => state.removeRingLayer)
@@ -65,8 +67,15 @@ export function EditorSidebar() {
 
       {SECTIONS.map((sectionKey) => {
         const section = design[sectionKey]
+        const isHighlighted = hoveredSection === sectionKey
+
         return (
-          <div key={sectionKey} className="editor-section">
+          <div
+            key={sectionKey}
+            className={`editor-section ${isHighlighted ? "section-highlight" : ""}`}
+            onMouseEnter={() => setHoveredSection(sectionKey)}
+            onMouseLeave={() => setHoveredSection(null)}
+          >
             <SectionEditor
               sectionKey={sectionKey}
               section={section}
