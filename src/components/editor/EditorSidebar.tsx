@@ -1,5 +1,6 @@
 import { useCueStore } from "../../store/useCueStore"
 import type { SectionKey, RingLayer, InlayConfig } from "../../types"
+import { CUE_WIDTH } from "../preview/CuePreview"
 import { SectionEditor } from "./SectionEditor"
 import { RingEditor } from "./RingEditor"
 import { InlayEditor } from "./InlayEditor"
@@ -90,6 +91,7 @@ export function EditorSidebar() {
 
             <InlayEditor
               sectionKey={sectionKey}
+              sectionWidth={CUE_WIDTH}
               inlay={section.inlay}
               onSetInlay={(inlay) => handleSetInlay(sectionKey, inlay)}
             />

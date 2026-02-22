@@ -1,7 +1,9 @@
 import type { InlayConfig, InlayType, VeneerLayer, SectionKey } from "../../types"
+import { getDefaultPointWidthForType } from "../../geometry/pointInlay"
 
 type Props = {
   sectionKey: SectionKey
+  sectionWidth: number
   inlay: InlayConfig | undefined
   onSetInlay: (inlay: InlayConfig | undefined) => void
 }
@@ -24,7 +26,9 @@ function getDefaultStartPosition(sectionKey: SectionKey): "top" | "bottom" {
   }
 }
 
-export function InlayEditor({ sectionKey, inlay, onSetInlay }: Props) {
+export function InlayEditor({ sectionKey, sectionWidth, inlay, onSetInlay }: Props) {
+  const defaultWidth = inlay ? getDefaultPointWidthForType(sectionWidth, inlay.type) : 0
+
   const handleToggle = () => {
     if (inlay) {
       onSetInlay(undefined)
@@ -126,11 +130,10 @@ export function InlayEditor({ sectionKey, inlay, onSetInlay }: Props) {
             <label>Width</label>
             <input
               type="number"
-              value={inlay.pointWidth ?? 0}
+              value={inlay.pointWidth ?? Math.round(defaultWidth)}
               onChange={(e) => handleUpdate({ pointWidth: Number(e.target.value) || undefined })}
-              min={0}
+              min={5}
               max={100}
-              placeholder="auto"
             />
           </div>
 

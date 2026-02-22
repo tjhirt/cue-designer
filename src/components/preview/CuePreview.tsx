@@ -2,7 +2,7 @@ import { useCueStore } from "../../store/useCueStore"
 import { JointPin } from "./JointPin"
 import { SectionRenderer, getSectionHeight } from "./SectionRenderer"
 
-const CUE_WIDTH = 60
+export const CUE_WIDTH = 60
 const JOINT_PIN_HEIGHT = 12
 const SVG_PADDING = 20
 
