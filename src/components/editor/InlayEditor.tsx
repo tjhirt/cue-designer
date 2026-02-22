@@ -1,6 +1,7 @@
-import type { InlayConfig, InlayType, VeneerLayer } from "../../types"
+import type { InlayConfig, InlayType, VeneerLayer, SectionKey } from "../../types"
 
 type Props = {
+  sectionKey: SectionKey
   inlay: InlayConfig | undefined
   onSetInlay: (inlay: InlayConfig | undefined) => void
 }
@@ -13,7 +14,17 @@ const INLAY_TYPES: { value: InlayType; label: string }[] = [
 
 const generateId = () => `veneer-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`
 
-export function InlayEditor({ inlay, onSetInlay }: Props) {
+function getDefaultStartPosition(sectionKey: SectionKey): "top" | "bottom" {
+  switch (sectionKey) {
+    case "buttSleeve":
+    case "buttCap":
+      return "top"
+    default:
+      return "bottom"
+  }
+}
+
+export function InlayEditor({ sectionKey, inlay, onSetInlay }: Props) {
   const handleToggle = () => {
     if (inlay) {
       onSetInlay(undefined)
@@ -22,6 +33,7 @@ export function InlayEditor({ inlay, onSetInlay }: Props) {
         type: "4-point",
         color: "#F5F5DC",
         pointLength: 50,
+        startPosition: getDefaultStartPosition(sectionKey),
         veneers: [],
       })
     }
@@ -106,8 +118,31 @@ export function InlayEditor({ inlay, onSetInlay }: Props) {
               value={inlay.pointLength ?? 50}
               onChange={(e) => handleUpdate({ pointLength: Number(e.target.value) })}
               min={10}
-              max={150}
+              max={200}
             />
+          </div>
+
+          <div className="field">
+            <label>Width</label>
+            <input
+              type="number"
+              value={inlay.pointWidth ?? 0}
+              onChange={(e) => handleUpdate({ pointWidth: Number(e.target.value) || undefined })}
+              min={0}
+              max={100}
+              placeholder="auto"
+            />
+          </div>
+
+          <div className="field">
+            <label>Start</label>
+            <select
+              value={inlay.startPosition ?? "bottom"}
+              onChange={(e) => handleUpdate({ startPosition: e.target.value as "top" | "bottom" })}
+            >
+              <option value="bottom">Bottom</option>
+              <option value="top">Top</option>
+            </select>
           </div>
 
           <div className="veneer-section">

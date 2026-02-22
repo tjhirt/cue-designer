@@ -89,6 +89,7 @@ export function EditorSidebar() {
             />
 
             <InlayEditor
+              sectionKey={sectionKey}
               inlay={section.inlay}
               onSetInlay={(inlay) => handleSetInlay(sectionKey, inlay)}
             />

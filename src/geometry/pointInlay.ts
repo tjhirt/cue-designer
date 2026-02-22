@@ -1,8 +1,35 @@
 import type { InlayConfig } from "../types"
 
-export type PointInlayPath = {
+export type PointPath = {
   color: string
   d: string
+}
+
+function getVisiblePoints(pointCount: number): { xRatio: number; widthRatio: number }[] {
+  const angleStep = (2 * Math.PI) / pointCount
+  const points: { xRatio: number; widthRatio: number }[] = []
+
+  for (let i = 0; i < pointCount; i++) {
+    const angle = i * angleStep
+    const normalizedAngle = ((angle + Math.PI) % (2 * Math.PI)) - Math.PI
+    
+    if (normalizedAngle < -Math.PI / 2 || normalizedAngle > Math.PI / 2) {
+      continue
+    }
+
+    const xRatio = Math.sin(normalizedAngle)
+    
+    const cosAngle = Math.cos(normalizedAngle)
+    const widthRatio = Math.max(0.5, cosAngle)
+    
+    points.push({ xRatio, widthRatio })
+  }
+
+  return points.sort((a, b) => a.xRatio - b.xRatio)
+}
+
+function getDefaultPointWidth(sectionWidth: number, pointCount: number): number {
+  return (sectionWidth * Math.PI) / pointCount
 }
 
 export function generatePointInlayPaths(
@@ -11,51 +38,64 @@ export function generatePointInlayPaths(
   height: number,
   startX: number,
   startY: number
-): PointInlayPath[] {
+): PointPath[] {
   const pointCount = getPointCount(config.type)
   if (pointCount === 0) return []
 
-  const pointLength = config.pointLength ?? height * 0.6
-  const paths: PointInlayPath[] = []
+  const pointLength = Math.min(config.pointLength ?? height * 0.7, height - 2)
+  const startPosition = config.startPosition ?? "bottom"
+  const defaultWidth = getDefaultPointWidth(width, pointCount)
+  const basePointWidth = config.pointWidth ?? defaultWidth
 
-  const allLayers: { color: string; offset: number }[] = [
-    { color: config.color, offset: 0 },
+  const visiblePoints = getVisiblePoints(pointCount)
+
+  const layers: { color: string; inset: number }[] = [
+    { color: config.color, inset: 0 },
     ...config.veneers.map((v, i) => ({
       color: v.color,
-      offset: (i + 1) * 3,
+      inset: (i + 1) * 2,
     })),
   ]
 
-  const angleStep = (2 * Math.PI) / pointCount
+  const paths: PointPath[] = []
 
-  allLayers.forEach((layer) => {
-    const points: string[] = []
-    const layerWidth = width - layer.offset * 2
-    const layerHeight = Math.min(pointLength, height - 4)
+  layers.forEach((layer) => {
+    const layerPaths: string[] = []
+    const inset = layer.inset
+    const layerStartX = startX + inset
+    const layerWidth = width - inset * 2
+    const layerEndX = layerStartX + layerWidth
+    const centerX = layerStartX + layerWidth / 2
+    const layerHeight = Math.max(pointLength - inset * 2, 10)
 
-    for (let i = 0; i < pointCount; i++) {
-      const angle = i * angleStep - Math.PI / 2
-      const tipX = startX + layer.offset + layerWidth / 2 + Math.cos(angle) * (layerWidth / 2 - 2)
-      const tipY = startY + 2
+    visiblePoints.forEach((point) => {
+      const tipX = centerX + (layerWidth / 2) * point.xRatio
+      const halfBase = (basePointWidth / 2) * point.widthRatio * (layerWidth / width)
+      
+      if (halfBase < 1) return
 
-      const baseAngleLeft = angle + Math.PI / pointCount
-      const baseAngleRight = angle - Math.PI / pointCount
-      const baseRadius = layerWidth / 2 - 4
+      const baseY = startPosition === "bottom" 
+        ? startY + height - inset
+        : startY + inset
+      const tipY = startPosition === "bottom"
+        ? startY + height - layerHeight - inset
+        : startY + layerHeight + inset
 
-      const baseLeftX = startX + layer.offset + layerWidth / 2 + Math.cos(baseAngleLeft) * baseRadius
-      const baseLeftY = startY + layerHeight
-      const baseRightX = startX + layer.offset + layerWidth / 2 + Math.cos(baseAngleRight) * baseRadius
-      const baseRightY = startY + layerHeight
+      const leftX = Math.max(layerStartX, tipX - halfBase)
+      const rightX = Math.min(layerEndX, tipX + halfBase)
 
-      points.push(
-        `M ${tipX} ${tipY} L ${baseLeftX} ${baseLeftY} L ${baseRightX} ${baseRightY} Z`
-      )
-    }
+      if (rightX <= leftX) return
 
-    paths.push({
-      color: layer.color,
-      d: points.join(" "),
+      const path = `M ${tipX} ${tipY} L ${leftX} ${baseY} L ${rightX} ${baseY} Z`
+      layerPaths.push(path)
     })
+
+    if (layerPaths.length > 0) {
+      paths.push({
+        color: layer.color,
+        d: layerPaths.join(" "),
+      })
+    }
   })
 
   return paths.reverse()

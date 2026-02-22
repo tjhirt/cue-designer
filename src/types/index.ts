@@ -24,6 +24,8 @@ export type InlayConfig = {
   type: InlayType
   color: string
   pointLength?: number
+  pointWidth?: number
+  startPosition?: "top" | "bottom"
   veneers: VeneerLayer[]
 }
 
