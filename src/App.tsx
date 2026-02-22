@@ -1,4 +1,5 @@
 import { CuePreview } from "./components/preview"
+import { EditorSidebar } from "./components/editor"
 import "./App.css"
 
 function App() {
@@ -11,9 +12,7 @@ function App() {
         <div className="preview-container">
           <CuePreview />
         </div>
-        <aside className="editor">
-          <p>Editor coming soon...</p>
-        </aside>
+        <EditorSidebar />
       </main>
     </div>
   )
