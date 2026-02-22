@@ -2,9 +2,19 @@ import React from 'react'
 import { useCueDesigns, useCreateCue, useDeleteCue } from '@/hooks/useCueDesigns'
 
 export default function CueList() {
-  const { data: cues, isLoading } = useCueDesigns()
+  const { data: cues, isLoading, error, data } = useCueDesigns()
   const createMutation = useCreateCue()
   const deleteMutation = useDeleteCue()
+
+  // Debug logging
+  React.useEffect(() => {
+    console.log('CueList - data received:', data)
+    console.log('CueList - cues:', cues)
+    console.log('CueList - error:', error)
+  }, [data, cues, error])
+
+  // Ensure we have an array
+  const cuesArray = Array.isArray(cues) ? cues : []
 
   const handleCreateNew = () => {
     createMutation.mutate({
@@ -27,6 +37,14 @@ export default function CueList() {
 
   if (isLoading) return <div className="p-8 text-center">Loading...</div>
 
+  if (error) {
+    return (
+      <div className="p-8 text-center text-red-600">
+        Error loading cue designs: {error.message}
+      </div>
+    )
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-6xl mx-auto px-6 py-8">
@@ -40,7 +58,7 @@ export default function CueList() {
           </button>
         </div>
 
-        {!cues || cues.length === 0 ? (
+        {!cuesArray || cuesArray.length === 0 ? (
           <div className="p-12 text-center bg-white rounded-lg shadow">
             <p className="text-gray-500 mb-4">No cue designs found</p>
             <button
@@ -52,7 +70,7 @@ export default function CueList() {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {cues.map((cue) => (
+            {cuesArray.map((cue) => (
               <div
                 key={cue.id}
                 onClick={() => (window.location.href = `/cues/${cue.id}/edit`)}

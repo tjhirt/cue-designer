@@ -58,14 +58,15 @@ class CueDesignSerializer(serializers.ModelSerializer):
 class CueDesignCreateSerializer(CueDesignSerializer):
     """Serializer for creating cue designs with sections in one request"""
 
-    sections = CueSectionSerializer(many=True)
+    sections = CueSectionSerializer(many=True, required=False)
 
     def create(self, validated_data):
-        sections_data = validated_data.pop("sections")
+        sections_data = validated_data.pop("sections", [])
         cue_design = CueDesign.objects.create(**validated_data)
 
         for section_data in sections_data:
-            CueSection.objects.create(cue_design=cue_design, **section_data)
+            section_data['cue_design'] = cue_design
+            CueSection.objects.create(**section_data)
 
         # Validate geometry
         geometry = self._create_geometry_from_db(cue_design)

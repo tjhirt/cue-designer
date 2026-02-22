@@ -2,10 +2,21 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { cuesApi } from '@/services/cues'
 import { CueDesign } from '@/types/cue'
 
+type PaginatedResponse<T> = {
+  count: number
+  next: string | null
+  previous: string | null
+  results: T[]
+}
+
 export function useCueDesigns() {
-  return useQuery({
+  return useQuery<CueDesign[]>({
     queryKey: ['cues'],
     queryFn: () => cuesApi.getAll(),
+    retry: 2,
+    onError: (error) => {
+      console.error('useCueDesigns error:', error)
+    },
   })
 }
 
