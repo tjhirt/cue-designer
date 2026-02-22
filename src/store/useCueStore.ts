@@ -1,5 +1,5 @@
 import { create } from "zustand"
-import { CueDesign, Section, SectionKey, RingLayer, VeneerLayer, JointPin, InlayConfig } from "../types"
+import type { CueDesign, Section, SectionKey, RingLayer, VeneerLayer, JointPin, InlayConfig } from "../types"
 
 const createDefaultSection = (baseColor: string, length: number): Section => ({
   baseColor,

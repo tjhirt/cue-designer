@@ -1,4 +1,4 @@
-import { JointPin as JointPinType } from "../../types"
+import type { JointPin as JointPinType } from "../../types"
 
 type Props = {
   jointPin: JointPinType

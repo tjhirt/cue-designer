@@ -1,4 +1,4 @@
-import { RingLayer } from "../../types"
+import type { RingLayer } from "../../types"
 
 type Props = {
   rings: RingLayer[]

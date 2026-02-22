@@ -1,4 +1,4 @@
-import { Section } from "../../types"
+import type { Section } from "../../types"
 import { RingStack } from "./RingStack"
 
 type Props = {
@@ -15,12 +15,6 @@ export function SectionRenderer({ section, x, y, width }: Props) {
     (sum, r) => sum + r.thickness,
     0
   )
-  const bottomRingsHeight = section.ringsBottom.reduce(
-    (sum, r) => sum + r.thickness,
-    0
-  )
-
-  const totalHeight = baseHeight + topRingsHeight + bottomRingsHeight
 
   return (
     <g>
