@@ -1,0 +1,1 @@
+export { useSyncAcrossTabs } from "./useSyncAcrossTabs"

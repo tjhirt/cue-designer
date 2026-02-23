@@ -29,16 +29,23 @@ function getVisiblePoints(pointCount: number): { xRatio: number; widthRatio: num
 }
 
 function getDefaultPointWidth(sectionWidth: number, pointCount: number): number {
-  const angleStep = (2 * Math.PI) / pointCount
-  const adjacentAngle = Math.min(angleStep, Math.PI / 2)
+  const visiblePoints = getVisiblePoints(pointCount)
+  if (visiblePoints.length < 2) return sectionWidth / 2
   
-  const xRatioAdjacent = Math.sin(adjacentAngle)
-  const widthRatioAdjacent = Math.max(0.5, Math.cos(adjacentAngle))
+  let minWidth = Infinity
   
-  const gap = xRatioAdjacent * (sectionWidth / 2)
-  const sumWidthRatios = 1 + widthRatioAdjacent
+  for (let i = 0; i < visiblePoints.length - 1; i++) {
+    const p1 = visiblePoints[i]
+    const p2 = visiblePoints[i + 1]
+    
+    const gap = (p2.xRatio - p1.xRatio) * (sectionWidth / 2)
+    const sumWidthRatios = p1.widthRatio + p2.widthRatio
+    
+    const width = (gap * 2) / sumWidthRatios
+    minWidth = Math.min(minWidth, width)
+  }
   
-  return (gap * 2) / sumWidthRatios
+  return minWidth
 }
 
 export function getDefaultPointWidthForType(sectionWidth: number, inlayType: string): number {

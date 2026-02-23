@@ -1,4 +1,5 @@
 import type { Section, SectionKey } from "../../types"
+import { PX_PER_CM } from "../../store/useCueStore"
 
 type Props = {
   sectionKey: SectionKey
@@ -15,6 +16,8 @@ const SECTION_LABELS: Record<SectionKey, string> = {
 }
 
 export function SectionEditor({ sectionKey, section, onUpdate }: Props) {
+  const lengthCm = (section.length / PX_PER_CM).toFixed(1)
+
   return (
     <div className="section-editor">
       <h3>{SECTION_LABELS[sectionKey]}</h3>
@@ -32,13 +35,14 @@ export function SectionEditor({ sectionKey, section, onUpdate }: Props) {
       </div>
 
       <div className="field">
-        <label>Length</label>
+        <label>Length (cm)</label>
         <input
           type="number"
-          value={section.length}
-          onChange={(e) => onUpdate({ length: Number(e.target.value) })}
-          min={10}
-          max={200}
+          value={lengthCm}
+          onChange={(e) => onUpdate({ length: Number(e.target.value) * PX_PER_CM })}
+          min={0.5}
+          max={50}
+          step={0.5}
         />
       </div>
     </div>

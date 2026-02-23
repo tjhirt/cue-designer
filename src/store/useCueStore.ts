@@ -1,9 +1,11 @@
 import { create } from "zustand"
 import type { CueDesign, Section, SectionKey, RingLayer, VeneerLayer, JointPin, InlayConfig } from "../types"
 
-const createDefaultSection = (baseColor: string, length: number): Section => ({
+export const PX_PER_CM = 24
+
+const createDefaultSection = (baseColor: string, lengthCm: number): Section => ({
   baseColor,
-  length,
+  length: lengthCm * PX_PER_CM,
   ringsTop: [],
   ringsBottom: [],
 })
@@ -13,17 +15,23 @@ const defaultDesign: CueDesign = {
     type: "radial-3-8x8",
     color: "#C0C0C0",
   },
-  jointCollar: createDefaultSection("#2C1810", 15),
-  forearm: createDefaultSection("#8B4513", 120),
-  handle: createDefaultSection("#1C1C1C", 100),
-  buttSleeve: createDefaultSection("#8B4513", 150),
-  buttCap: createDefaultSection("#2C1810", 20),
+  jointCollar: createDefaultSection("#2C1810", 2.5),
+  forearm: createDefaultSection("#8B4513", 29.5),
+  handle: createDefaultSection("#1C1C1C", 30.7),
+  buttSleeve: createDefaultSection("#8B4513", 9),
+  buttCap: createDefaultSection("#2C1810", 1.5),
 }
 
 type CueStore = {
   design: CueDesign
   hoveredSection: SectionKey | null
+  selectedSection: SectionKey
+  topPanelCollapsed: boolean
+  bottomPanelCollapsed: boolean
   setHoveredSection: (key: SectionKey | null) => void
+  setSelectedSection: (key: SectionKey) => void
+  toggleTopPanel: () => void
+  toggleBottomPanel: () => void
   setJointPin: (jointPin: JointPin) => void
   updateSection: (key: SectionKey, section: Partial<Section>) => void
   addRingLayer: (sectionKey: SectionKey, position: "top" | "bottom", ring: RingLayer) => void
@@ -39,8 +47,14 @@ type CueStore = {
 export const useCueStore = create<CueStore>((set) => ({
   design: defaultDesign,
   hoveredSection: null,
+  selectedSection: "forearm",
+  topPanelCollapsed: true,
+  bottomPanelCollapsed: false,
 
   setHoveredSection: (key) => set({ hoveredSection: key }),
+  setSelectedSection: (key) => set({ selectedSection: key }),
+  toggleTopPanel: () => set((state) => ({ topPanelCollapsed: !state.topPanelCollapsed })),
+  toggleBottomPanel: () => set((state) => ({ bottomPanelCollapsed: !state.bottomPanelCollapsed })),
 
   setJointPin: (jointPin) =>
     set((state) => ({

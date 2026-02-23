@@ -4,20 +4,21 @@ type Props = {
   jointPin: JointPinType
   x: number
   y: number
-  width: number
   height: number
+  length: number
 }
 
-export function JointPin({ jointPin, x, y, width, height }: Props) {
-  const centerX = x + width / 2
-  const radius = Math.min(width, height) * 0.3
+export function JointPin({ jointPin, x, y, height, length }: Props) {
+  const centerX = x + length - height / 2
+  const centerY = y + height / 2
+  const radius = height * 0.3
 
   return (
     <g>
       <rect
         x={x}
         y={y}
-        width={width}
+        width={length}
         height={height}
         fill={jointPin.color}
         stroke="#333"
@@ -25,7 +26,7 @@ export function JointPin({ jointPin, x, y, width, height }: Props) {
       />
       <circle
         cx={centerX}
-        cy={y + height / 2}
+        cy={centerY}
         r={radius}
         fill={jointPin.color}
         stroke="#222"
@@ -33,7 +34,7 @@ export function JointPin({ jointPin, x, y, width, height }: Props) {
       />
       <circle
         cx={centerX}
-        cy={y + height / 2}
+        cy={centerY}
         r={radius * 0.4}
         fill="#222"
       />
